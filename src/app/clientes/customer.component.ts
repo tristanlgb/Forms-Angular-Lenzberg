@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormBuilder, Validators, AbstractControl, ValidatorFn, FormArray } from '@angular/forms';
-
 import { debounceTime } from 'rxjs/operators';
 
 import { Customer } from './customer';
@@ -10,13 +9,14 @@ class EmailMatcher {
     const emailControl = c.get('email');
     const confirmControl = c.get('confirmEmail');
 
-    if (emailControl?.pristine || confirmControl?.pristine) {
+    if (emailControl && confirmControl && (emailControl.pristine || confirmControl.pristine)) {
       return null;
     }
 
-    if (emailControl?.value === confirmControl?.value) {
+    if (emailControl && confirmControl && emailControl.value === confirmControl.value) {
       return null;
     }
+
     return { match: true };
   }
 }
@@ -39,16 +39,15 @@ class RatingRangeValidator {
 })
 export class CustomerComponent implements OnInit {
   customerForm: FormGroup;
-  customer = new Customer();
   emailMessage: string = '';
 
   get addresses(): FormArray {
     return this.customerForm.get('addresses') as FormArray;
   }
 
-  private validationMessages = {
-    required: 'por favor ingrese su email',
-    email: 'por favor ingrese su correo electronico'
+  validationMessages = {
+    required: 'Por favor ingrese su email',
+    email: 'Por favor ingrese un correo electrónico válido'
   };
 
   constructor(private fb: FormBuilder) { }
@@ -63,7 +62,6 @@ export class CustomerComponent implements OnInit {
       }, { validator: EmailMatcher.match }),
       phone: '',
       notification: 'email',
-     
       addresses: this.fb.array([this.buildAddress()])
     });
 
@@ -96,18 +94,20 @@ export class CustomerComponent implements OnInit {
 
   populateTestData(): void {
     this.customerForm.patchValue({
-      firstName: 'juan',
-      lastName: 'perez',
-      emailGroup: { email: 'juan@mail.com', confirmEmail: 'juan@email.com' }
+      firstName: 'Juan',
+      lastName: 'Perez',
+      emailGroup: { email: 'juan@mail.com', confirmEmail: 'juan@mail.com' }
     });
+
     const addressGroup = this.fb.group({
       addressType: 'work',
-      street1: 'calle republica',
+      street1: 'Calle República',
       street2: '',
-      city: 'ciudad de cordoba',
+      city: 'Ciudad de Córdoba',
       state: 'CBA',
       zip: '123'
     });
+
     this.customerForm.setControl('addresses', this.fb.array([addressGroup]));
   }
 
